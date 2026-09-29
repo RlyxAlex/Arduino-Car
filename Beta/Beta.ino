@@ -1,8 +1,15 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C mylcd(0x27,16,2);
-bool braketest=true;
+enum BrakeSwitch : bool {
+  Disable = false,
+  Enabled = true
+};
+
+LiquidCrystal_I2C lcd_tail(0x27,16,2);
+
+BrakeSwitch BrakeActivated = Enabled;
+
 //Motor函数--dirpin1（第一个参数）:方向管脚1，dirpin2：方向管脚2，speedpin：EN管脚，speed：速度值（-255-255）
 void Motor(int dirpin1,int dirpin2,int speedpin,int speed){
   digitalWrite(dirpin2,!digitalRead(dirpin1));
@@ -19,8 +26,8 @@ void Motor(int dirpin1,int dirpin2,int speedpin,int speed){
     analogWrite(speedpin,-speed);
   }
 }
-//checkdistance_13_12函数 ：超声波测距,Trig:13,Echo:12
-float checkdistance_13_12(){
+//Ultrasound_front函数 ：超声波测距,Trig:13,Echo:12
+float Ultrasound_front(){
   digitalWrite(13,LOW);
   delayMicroseconds(2);
   digitalWrite(13,HIGH);
@@ -31,15 +38,15 @@ float checkdistance_13_12(){
   return distance;
 }
 
-void setLCD(){
-  mylcd.clear();
-  mylcd.setCursor(0, 0);
-  mylcd.print(String(checkdistance_13_12()) + String("cm"));
+void Display(){
+  lcd_tail.clear();
+  lcd_tail.setCursor(0, 0);
+  lcd_tail.print(String(Ultrasound_front()) + String("cm"));
   delay(500);
 }
 
 void straight(){
-  if (braketest==false) {
+  if (BrakeActivated==Disable) {
     Motor(5, 7, 6, 255);
     Motor(8, 10, 9, 255);
   }
@@ -49,19 +56,14 @@ void straight(){
 }
 
 void brake(){
-  for (int i=1; i<=3; i++) {
-    Motor(5, 7, 6, -255);
-    Motor(8, 10, 9, -255);
-  }
   Motor(5, 7, 6, 0);
   Motor(8, 10, 9, 0);
-  Serial.println("Brake");
   delay(1000);
 }
 
 void setup(){
-  mylcd.init();
-  mylcd.backlight();
+  lcd_tail.init();
+  lcd_tail.backlight();
   pinMode(5, OUTPUT);
   pinMode(7, OUTPUT);
   digitalWrite(5, LOW);
@@ -75,29 +77,17 @@ void setup(){
   pinMode(12, INPUT);
   Motor(5, 7, 6, 0);
   Motor(8, 10, 9, 0);
-  // Serial.println("Serial is Ready");
-  // Serial.println("LCD is Ready");
-  // delay(250);
-  // Serial.println("Motor is Ready");
-  // delay(250);
-  // if (checkdistance_13_12() > 0) {
-  //   Serial.println("Ultrasound Ready");
-  //   delay(500);
-  // }
-  // Serial.println("Wifi Connecting");
-  // Serial.println("All Ready");
-  // delay(2000);
 }
 void loop(){
-  setLCD();
+  Display();
   Serial.flush();
-  if(checkdistance_13_12() <= 30){
-    setLCD();
+  if(Ultrasound_front() <= 30){
+    Display();
     brake();
-    braketest=true;
+    BrakeActivated=Enabled;
   }
   else{
-    braketest=false;
+    BrakeActivated=Disable;
   }
   straight();
 }
