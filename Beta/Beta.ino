@@ -2,7 +2,7 @@
 #include <LiquidCrystal_I2C.h>
 
 LiquidCrystal_I2C mylcd(0x27,16,2);
-
+bool braketest=true;
 //Motor函数--dirpin1（第一个参数）:方向管脚1，dirpin2：方向管脚2，speedpin：EN管脚，speed：速度值（-255-255）
 void Motor(int dirpin1,int dirpin2,int speedpin,int speed){
   digitalWrite(dirpin2,!digitalRead(dirpin1));
@@ -39,8 +39,13 @@ void setLCD(){
 }
 
 void straight(){
-  Motor(5, 7, 6, 255);
-  Motor(8, 10, 9, 255);
+  if (braketest==false) {
+    Motor(5, 7, 6, 255);
+    Motor(8, 10, 9, 255);
+  }
+  else{
+    return;
+  }
 }
 
 void brake(){
@@ -50,6 +55,7 @@ void brake(){
   }
   Motor(5, 7, 6, 0);
   Motor(8, 10, 9, 0);
+  Serial.println("Brake");
   delay(1000);
 }
 
@@ -69,25 +75,29 @@ void setup(){
   pinMode(12, INPUT);
   Motor(5, 7, 6, 0);
   Motor(8, 10, 9, 0);
-  Serial.println("Serial is Ready");
-  Serial.println("LCD is Ready");
-  delay(250);
-  Serial.println("Motor is Ready");
-  delay(250);
-  if (checkdistance_13_12() > 0) {
-    Serial.println("Ultrasound Ready");
-    delay(500);
-  }
-  Serial.println("Wifi Connecting");
-  Serial.println("All Ready");
-  delay(2000);
+  // Serial.println("Serial is Ready");
+  // Serial.println("LCD is Ready");
+  // delay(250);
+  // Serial.println("Motor is Ready");
+  // delay(250);
+  // if (checkdistance_13_12() > 0) {
+  //   Serial.println("Ultrasound Ready");
+  //   delay(500);
+  // }
+  // Serial.println("Wifi Connecting");
+  // Serial.println("All Ready");
+  // delay(2000);
 }
 void loop(){
   setLCD();
   Serial.flush();
-  straight();
-  if(checkdistance_13_12 <= 25){
+  if(checkdistance_13_12() <= 30){
     setLCD();
     brake();
+    braketest=true;
   }
+  else{
+    braketest=false;
+  }
+  straight();
 }
