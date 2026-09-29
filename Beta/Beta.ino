@@ -26,9 +26,31 @@ float checkdistance_13_12(){
   digitalWrite(13,HIGH);
   delayMicroseconds(10);
   digitalWrite(13,LOW);
-  float distance = pulsIn(12,HIGH) / 58.00;
+  float distance = pulseIn(12,HIGH) / 58.00;
   delay(10);
   return distance;
+}
+
+void setLCD(){
+  mylcd.clear();
+  mylcd.setCursor(0, 0);
+  mylcd.print(String(checkdistance_13_12()) + String("cm"));
+  delay(500);
+}
+
+void straight(){
+  Motor(5, 7, 6, 255);
+  Motor(8, 10, 9, 255);
+}
+
+void brake(){
+  for (int i=1; i<=3; i++) {
+    Motor(5, 7, 6, -255);
+    Motor(8, 10, 9, -255);
+  }
+  Motor(5, 7, 6, 0);
+  Motor(8, 10, 9, 0);
+  delay(1000);
 }
 
 void setup(){
@@ -45,8 +67,8 @@ void setup(){
   Serial.begin(9600);
   pinMode(13, OUTPUT);
   pinMode(12, INPUT);
-  setMotor(5, 7, 6, 0);
-  setMotor(8, 10, 9, 0);
+  Motor(5, 7, 6, 0);
+  Motor(8, 10, 9, 0);
   Serial.println("Serial is Ready");
   Serial.println("LCD is Ready");
   delay(250);
@@ -61,5 +83,11 @@ void setup(){
   delay(2000);
 }
 void loop(){
-
+  setLCD();
+  Serial.flush();
+  straight();
+  if(checkdistance_13_12 <= 25){
+    setLCD();
+    brake();
+  }
 }
