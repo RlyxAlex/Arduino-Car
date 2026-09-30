@@ -63,6 +63,8 @@ void loop(){
   if(Ultrasound_front() <= 30){
     Display();
     brake();
+    delay(1000);
+    Reversing()
     BrakeActivated=Enabled;
   }
   else{
