@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include "Car.h"
 
 enum BrakeSwitch : bool {
   Disable = false,
@@ -10,30 +11,14 @@ LiquidCrystal_I2C lcd_tail(0x27,16,2);
 
 BrakeSwitch BrakeActivated = Enabled;
 
-//Motor函数--dirpin1（第一个参数）:方向管脚1，dirpin2：方向管脚2，speedpin：EN管脚，speed：速度值（-255-255）
-void Motor(int dirpin1,int dirpin2,int speedpin,int speed){
-  digitalWrite(dirpin2,!digitalRead(dirpin1));
-  if(speed == 0){
-    digitalWrite(dirpin1,LOW);
-    analogWrite(speedpin,0);
-  }
-  else if(speed > 0){
-    digitalWrite(dirpin1,LOW);
-    analogWrite(speedpin,speed);
-  }
-  else{
-    digitalWrite(dirpin1,HIGH);
-    analogWrite(speedpin,-speed);
-  }
-}
 //Ultrasound_front函数 ：超声波测距,Trig:13,Echo:12
 float Ultrasound_front(){
-  digitalWrite(13,LOW);
+  digitalWrite(ULTRA_TRIG_Front,LOW);
   delayMicroseconds(2);
-  digitalWrite(13,HIGH);
+  digitalWrite(ULTRA_TRIG_Front,HIGH);
   delayMicroseconds(10);
-  digitalWrite(13,LOW);
-  float distance = pulseIn(12,HIGH) / 58.00;
+  digitalWrite(ULTRA_TRIG_Front,LOW);
+  float distance = pulseIn(ULTRA_ECHO_Front,HIGH) / 58.00;
   delay(10);
   return distance;
 }
@@ -47,8 +32,7 @@ void Display(){
 
 void straight(){
   if (BrakeActivated==Disable) {
-    Motor(5, 7, 6, 255);
-    Motor(8, 10, 11, 255);
+    car_forward(255);
   }
   else{
     return;
@@ -57,32 +41,21 @@ void straight(){
 
 void Reversing(){
   if (BrakeActivated==Enabled) {
-    Motor(5, 7, 6, -255);
-    Motor(8, 10, 11, -255);
+    car_backward(255);
   }
 }
 
 void brake(){
-  Motor(5, 7, 6, 0);
-  Motor(8, 10, 11, 0);
+  car_stop();
 }
 
 void setup(){
   lcd_tail.init();
   lcd_tail.backlight();
-  pinMode(5, OUTPUT);
-  pinMode(7, OUTPUT);
-  digitalWrite(5, LOW);
-  digitalWrite(7, LOW);
-  pinMode(8, OUTPUT);
-  pinMode(10, OUTPUT);
-  digitalWrite(8, LOW);
-  digitalWrite(10, LOW);
   Serial.begin(9600);
-  pinMode(13, OUTPUT);
-  pinMode(12, INPUT);
-  Motor(5, 7, 6, 0);
-  Motor(8, 10, 11, 0);
+  Pin_setup();
+  car_setup();
+  car_stop();
 }
 void loop(){
   Display();

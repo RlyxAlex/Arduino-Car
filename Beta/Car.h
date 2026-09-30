@@ -30,8 +30,8 @@ static inline void car_wheel_right(int speed) {
 
 //两轮组合动作
 static inline void car_drive(int left, int right) {
-  wheel_left(left);
-  wheel_right(right);
+  car_wheel_left(left);
+  car_wheel_right(right);
 }
 
 static inline void car_forward(int speed = 255)      { car_drive(speed,  speed); }
@@ -55,4 +55,18 @@ static inline void car_setup() {
   pinMode(MOTOR_R_EN,  OUTPUT);
 
   car_stop();
+}
+
+//引脚初始化
+static inline void Pin_setup() {
+  pinMode(MOTOR_L_IN1, OUTPUT);
+  pinMode(MOTOR_L_IN2, OUTPUT);
+  digitalWrite(MOTOR_L_IN1, LOW);
+  digitalWrite(MOTOR_L_IN2, LOW);
+  pinMode(MOTOR_R_IN1, OUTPUT);
+  pinMode(MOTOR_R_IN2, OUTPUT);
+  digitalWrite(MOTOR_R_IN1, LOW);
+  digitalWrite(MOTOR_R_IN2, LOW);
+  pinMode(ULTRA_TRIG_Front, OUTPUT);
+  pinMode(ULTRA_ECHO_Front, INPUT);
 }
