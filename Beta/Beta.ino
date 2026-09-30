@@ -48,17 +48,23 @@ void Display(){
 void straight(){
   if (BrakeActivated==Disable) {
     Motor(5, 7, 6, 255);
-    Motor(8, 10, 9, 255);
+    Motor(8, 10, 11, 255);
   }
   else{
     return;
   }
 }
 
+void Reversing(){
+  if (BrakeActivated==Enabled) {
+    Motor(5, 7, 6, -255);
+    Motor(8, 10, 11, -255);
+  }
+}
+
 void brake(){
   Motor(5, 7, 6, 0);
-  Motor(8, 10, 9, 0);
-  delay(1000);
+  Motor(8, 10, 11, 0);
 }
 
 void setup(){
@@ -76,7 +82,7 @@ void setup(){
   pinMode(13, OUTPUT);
   pinMode(12, INPUT);
   Motor(5, 7, 6, 0);
-  Motor(8, 10, 9, 0);
+  Motor(8, 10, 11, 0);
 }
 void loop(){
   Display();
