@@ -2,14 +2,15 @@
 #include <LiquidCrystal_I2C.h>
 #include "Car.h"
 
-enum BrakeSwitch : bool {
+enum Status : bool {
   Disable = false,
   Enabled = true
 };
 
 LiquidCrystal_I2C lcd_tail(0x27,16,2);
 
-BrakeSwitch BrakeActivated = Enabled;
+Status BrakeActivated = Enabled;
+Status ReverseActivation = Disable;
 
 //Ultrasound_front函数 ：超声波测距,Trig:13,Echo:12
 float Ultrasound_front(){
@@ -40,13 +41,14 @@ void straight(){
 }
 
 void Reversing(){
-  if (BrakeActivated==Enabled) {
-    car_backward(255);
-  }
+  ReverseActivation=Enabled;
+  car_backward(255);
 }
 
 void brake(){
-  car_stop();
+  if(ReverseActivation!=Enabled){
+    car_stop();
+  }
 }
 
 void setup(){
@@ -64,10 +66,11 @@ void loop(){
     Display();
     brake();
     delay(1000);
-    Reversing()
+    Reversing();
     BrakeActivated=Enabled;
   }
   else{
+    ReverseActivation=Disable;
     BrakeActivated=Disable;
   }
   straight();
